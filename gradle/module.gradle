@@ -1,0 +1,105 @@
+apply plugin: 'java-library'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+
+sourceSets {
+    test.compileClasspath += configurations.compileOnly
+    test.runtimeClasspath += configurations.compileOnly
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier 'sources'
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+def yarn(String dir, List<String> params) {
+    def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+    def command = isWindows ? ['cmd', '/c', 'yarn'] : ['yarn']
+    command.addAll(params)
+    return {
+        workingDir dir
+        commandLine command
+    }
+}
+
+processResources {
+    doLast {
+        if (project.file('src/main/web/package.json').exists()) {
+            exec yarn("${projectDir}/src/main/web/", ['install'])
+            delete "${projectDir}/src/main/dist/web/"
+            exec yarn("${projectDir}/src/main/web/", ['release'])
+
+            copy {
+                from(project.file("src/main/dist/web")) {
+                    include('**/*')
+                }
+                into new File(sourceSets.main.output.resourcesDir, 'web')
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    compileJava {
+        doFirst {
+            options.compilerArgs = [
+                    '--module-path', classpath.asPath
+            ]
+            classpath = files()
+        }
+    }
+
+    if (project.hasProperty("release")) {
+        apply plugin: 'signing'
+
+        signing {
+            sign configurations.archives
+        }
+
+        task proguard(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
+            libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+            println(project.configurations.compileClasspath.copyRecursive().files)
+            libraryjars project.configurations.compileClasspath.copyRecursive().files
+            ignorewarnings
+            configuration "${rootDir}/gradle/proguard/proguard.conf"
+            injars file("${buildDir}/libs/${project.name}-${project.version}.jar")
+            outjars file("${buildDir}/libs/${project.name}-${project.version}.min.jar")
+
+            doLast {
+                file("${buildDir}/libs/${project.name}-${project.version}.jar").delete()
+                file("${buildDir}/libs/${project.name}-${project.version}.min.jar").renameTo(file("${buildDir}/libs/${project.name}-${project.version}.jar"))
+            }
+        }
+
+        task signJar {
+            dependsOn proguard
+            def libFiles = fileTree("${buildDir}/libs/").include("*.jar").files
+            libFiles.each {
+                ant.jar(destfile: it, update: true) {
+                    delegate.manifest {
+                        attribute(name: 'permissions', value: 'all-permissions')
+                        attribute(name: 'codebase', value: '*')
+                    }
+                }
+
+                ant.signjar(
+                        tsaurl: "http://timestamp.comodoca.com",
+                        alias: "${project.hasProperty('signJar.alias') ? project.property('signJar.alias') : ''}",
+                        jar: it,
+                        keystore: file("${project.hasProperty('signJar.keystore') ? project.property('signJar.keystore') : ''}"),
+                        storepass: "${project.hasProperty('signJar.storepass') ? project.property('signJar.storepass') : ''}",
+                        keypass: "${project.hasProperty('signJar.keypass') ? project.property('signJar.keypass') : ''}",
+                        destDir: file("${buildDir}/libs/"),
+                        preservelastmodified: 'true'
+                )
+            }
+        }
+
+        publish.dependsOn proguard, signJar, signArchives
+        signArchives.dependsOn signJar
+    }
+}

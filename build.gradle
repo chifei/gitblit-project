@@ -1,0 +1,124 @@
+apply from: file("${rootDir}/gradle/project.gradle")
+def repo = System.getProperty("user.home")
+
+def jetty_version = '9.2.13.v20150730'
+def slf4j_version = '1.7.12'
+def wicket_version = '1.4.22'
+def lucene_version = '5.5.2'
+def jgit_version = '4.1.1.201511131810-r'
+def groovy_version = '2.4.4'
+def bouncycastle_version = '1.52'
+def selenium_version = '2.28.0'
+def wikitext_version = '1.4'
+def sshd_version = '1.0.0'
+def mina_version = '2.0.9'
+def guice_version = '4.0'
+def guice_servlet_version = '4.0'
+
+subprojects {
+    apply plugin: 'maven-publish'
+    repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+        mavenLocal()
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
+        repositories {
+            maven {
+                url "${repo}/Workspace/maven-repo"
+            }
+        }
+    }
+
+    group = 'app.gitblit'
+    version = "1.0"
+}
+
+
+project(':gitblit') {
+    apply from: file("${rootDir}/gradle/app.gradle")
+
+    dependencies {
+        compile fileTree(dir: "${rootDir}/libs/", include: '*.jar')
+        compile group: 'javax.activation', name: 'activation', version: '1.1'
+
+        compile "com.google.inject:guice:${guice_version}"
+        compile "com.google.inject.extensions:guice-servlet:${guice_servlet_version}"
+        compile "com.google.guava:guava:18.0"
+        compile "com.intellij:annotations:12.0"
+        compile "log4j:log4j:1.2.17"
+        compile "org.slf4j:slf4j-api:${slf4j_version}"
+        compile "org.slf4j:slf4j-log4j12:${slf4j_version}"
+        compile "com.sun.mail:javax.mail:1.5.1"
+        compile "javax.servlet:javax.servlet-api:3.1.0"
+        compile "org.eclipse.jetty.aggregate:jetty-all:${jetty_version}"
+        compile "org.apache.wicket:wicket:${wicket_version}"
+        compile "org.apache.wicket:wicket-auth-roles:${wicket_version}"
+        compile "org.apache.wicket:wicket-extensions:${wicket_version}"
+        compile "org.apache.lucene:lucene-core:${lucene_version}"
+        compile "org.apache.lucene:lucene-analyzers-common:${lucene_version}"
+        compile "org.apache.lucene:lucene-highlighter:${lucene_version}"
+        compile "org.apache.lucene:lucene-memory:${lucene_version}"
+        compile "org.apache.lucene:lucene-queryparser:${lucene_version}"
+        compile "org.pegdown:pegdown:1.5.0"
+        compile "org.fusesource.wikitext:wikitext-core:${wikitext_version}"
+        compile "org.fusesource.wikitext:twiki-core:${wikitext_version}"
+        compile "org.fusesource.wikitext:textile-core:${wikitext_version}"
+        compile "org.fusesource.wikitext:tracwiki-core:${wikitext_version}"
+        compile "org.fusesource.wikitext:mediawiki-core:${wikitext_version}"
+        compile "org.fusesource.wikitext:confluence-core:${wikitext_version}"
+        compile "org.eclipse.jgit:org.eclipse.jgit:${jgit_version}"
+        compile "org.eclipse.jgit:org.eclipse.jgit.http.server:${jgit_version}"
+        compile "org.bouncycastle:bcprov-jdk15on:${bouncycastle_version}"
+        compile "org.bouncycastle:bcmail-jdk15on:${bouncycastle_version}"
+        compile "org.bouncycastle:bcpkix-jdk15on:${bouncycastle_version}"
+        compile "org.apache.sshd:sshd-core:${sshd_version}"
+        compile "org.apache.mina:mina-core:${mina_version}"
+        compile "rome:rome:0.9"
+        compile "com.google.code.gson:gson:2.3.1"
+        compile "org.codehaus.groovy:groovy-all:${groovy_version}"
+        compile "com.unboundid:unboundid-ldapsdk:2.3.8"
+        compile "org.apache.ivy:ivy:2.2.0"
+        compile "com.toedter:jcalendar:1.3.2"
+        compile "org.apache.commons:commons-compress:1.4.1"
+        compile "commons-io:commons-io:2.2"
+        compile "com.force.api:force-partner-api:24.0.0"
+        compile "org.freemarker:freemarker:2.3.22"
+        compile "com.github.dblock.waffle:waffle-jna:1.7.3"
+        compile "org.kohsuke:libpam4j:1.8"
+        compile "args4j:args4j:2.0.29"
+        compile "commons-codec:commons-codec:1.7"
+        compile "redis.clients:jedis:2.6.2"
+        compile "ro.fortsoft.pf4j:pf4j:0.9.0"
+        compile "org.apache.tika:tika-core:1.5"
+        compile "org.jsoup:jsoup:1.7.3"
+        compile group: 'org.kohsuke.args4j', name: 'args4j-maven-plugin', version: '2.33'
+        testCompile "junit:junit:4.12"
+        testCompile "org.seleniumhq.selenium:selenium-java:${selenium_version}"
+        testCompile "org.seleniumhq.selenium:selenium-support:${selenium_version}"
+        testCompile "org.seleniumhq.selenium:selenium-firefox-driver:${selenium_version}"
+        testCompile "org.mockito:mockito-core:1.10.19"
+    }
+
+    task flatJar(type: Jar) {
+        zip64 true
+        manifest {
+            attributes(
+                    'Main-Class': 'Main'
+            )
+        }
+        from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } } {
+            exclude 'META-INF/*'
+        }
+        with jar
+    }
+}
+
+
