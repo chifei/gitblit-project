@@ -18,7 +18,6 @@ def guice_servlet_version = '4.0'
 subprojects {
     apply plugin: 'maven-publish'
     repositories {
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         mavenCentral()
         mavenLocal()
     }
