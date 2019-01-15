@@ -1,6 +1,6 @@
-package com.gitblit.custom.guice;
+package com.gitblit.console.guice;
 
-import com.gitblit.custom.servlet.RepositoriesServlet;
+import com.gitblit.console.servlet.RepositoriesServlet;
 import com.google.inject.servlet.ServletModule;
 
 /**

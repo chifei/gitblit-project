@@ -1,4 +1,4 @@
-package com.gitblit.custom.servlet;
+package com.gitblit.console.servlet;
 
 import com.gitblit.IStoredSettings;
 import com.gitblit.manager.IGitblit;

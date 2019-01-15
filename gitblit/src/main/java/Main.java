@@ -1,4 +1,4 @@
-import com.gitblit.GitBlitServer;
+import com.gitblit.ConsoleServer;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -52,7 +52,7 @@ public class Main {
         }
         String[] a = {"--baseFolder", new File(home, "data").getAbsolutePath()};
         String[] arguments = Stream.of(args, a).flatMap(Stream::of).toArray(String[]::new);
-        GitBlitServer.main(arguments);
+        ConsoleServer.main(arguments);
     }
 
     private boolean isInitialized(File dir) {
