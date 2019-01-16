@@ -82,7 +82,7 @@ public class TicketIndexer {
         try {
             IndexWriter writer = this.getWriter();
             StandardAnalyzer analyzer = new StandardAnalyzer();
-            QueryParser qp = new QueryParser(TicketIndexer.Lucene.rid.name(), analyzer);
+            QueryParser qp = new QueryParser(Lucene.rid.name(), analyzer);
             BooleanQuery query = new BooleanQuery();
             query.add(qp.parse(repository.getRID()), Occur.MUST);
             int numDocsBefore = writer.numDocs();
@@ -148,7 +148,7 @@ public class TicketIndexer {
 
     private boolean delete(String repository, long ticketId, IndexWriter writer) throws Exception {
         StandardAnalyzer analyzer = new StandardAnalyzer();
-        QueryParser qp = new QueryParser(TicketIndexer.Lucene.did.name(), analyzer);
+        QueryParser qp = new QueryParser(Lucene.did.name(), analyzer);
         BooleanQuery query = new BooleanQuery();
         query.add(qp.parse(StringUtils.getSHA1(repository + ticketId)), Occur.MUST);
         int numDocsBefore = writer.numDocs();
@@ -166,7 +166,7 @@ public class TicketIndexer {
     }
 
     public boolean hasTickets(RepositoryModel repository) {
-        return !this.queryFor(TicketIndexer.Lucene.rid.matches(repository.getRID()), 1, 0, (String) null, true).isEmpty();
+        return !this.queryFor(Lucene.rid.matches(repository.getRID()), 1, 0, (String) null, true).isEmpty();
     }
 
     public List<QueryResult> searchFor(RepositoryModel repository, String text, int page, int pageSize) {
@@ -178,13 +178,13 @@ public class TicketIndexer {
 
             try {
                 BooleanQuery query = new BooleanQuery();
-                QueryParser qp = new QueryParser(TicketIndexer.Lucene.title.name(), analyzer);
+                QueryParser qp = new QueryParser(Lucene.title.name(), analyzer);
                 qp.setAllowLeadingWildcard(true);
                 query.add(qp.parse(text), Occur.SHOULD);
-                qp = new QueryParser(TicketIndexer.Lucene.body.name(), analyzer);
+                qp = new QueryParser(Lucene.body.name(), analyzer);
                 qp.setAllowLeadingWildcard(true);
                 query.add(qp.parse(text), Occur.SHOULD);
-                qp = new QueryParser(TicketIndexer.Lucene.content.name(), analyzer);
+                qp = new QueryParser(Lucene.content.name(), analyzer);
                 qp.setAllowLeadingWildcard(true);
                 query.add(qp.parse(text), Occur.SHOULD);
                 IndexSearcher searcher = this.getSearcher();
@@ -219,16 +219,16 @@ public class TicketIndexer {
             StandardAnalyzer analyzer = new StandardAnalyzer();
 
             try {
-                QueryParser qp = new QueryParser(TicketIndexer.Lucene.content.name(), analyzer);
+                QueryParser qp = new QueryParser(Lucene.content.name(), analyzer);
                 Query query = qp.parse(queryText);
                 IndexSearcher searcher = this.getSearcher();
                 Query rewrittenQuery = searcher.rewrite(query);
                 this.log.debug(rewrittenQuery.toString());
                 Sort sort;
                 if (sortBy == null) {
-                    sort = new Sort(TicketIndexer.Lucene.created.asSortField(desc));
+                    sort = new Sort(Lucene.created.asSortField(desc));
                 } else {
-                    sort = new Sort(TicketIndexer.Lucene.fromString(sortBy).asSortField(desc));
+                    sort = new Sort(Lucene.fromString(sortBy).asSortField(desc));
                 }
 
                 int maxSize = 5000;
@@ -320,32 +320,32 @@ public class TicketIndexer {
 
     private Document ticketToDoc(TicketModel ticket) {
         Document doc = new Document();
-        this.toDocField(doc, TicketIndexer.Lucene.rid, StringUtils.getSHA1(ticket.repository));
-        this.toDocField(doc, TicketIndexer.Lucene.did, StringUtils.getSHA1(ticket.repository + ticket.number));
-        this.toDocField(doc, TicketIndexer.Lucene.project, ticket.project);
-        this.toDocField(doc, TicketIndexer.Lucene.repository, ticket.repository);
-        this.toDocField(doc, TicketIndexer.Lucene.number, ticket.number);
-        this.toDocField(doc, TicketIndexer.Lucene.title, ticket.title);
-        this.toDocField(doc, TicketIndexer.Lucene.body, ticket.body);
-        this.toDocField(doc, TicketIndexer.Lucene.created, ticket.created);
-        this.toDocField(doc, TicketIndexer.Lucene.createdby, ticket.createdBy);
-        this.toDocField(doc, TicketIndexer.Lucene.updated, ticket.updated);
-        this.toDocField(doc, TicketIndexer.Lucene.updatedby, ticket.updatedBy);
-        this.toDocField(doc, TicketIndexer.Lucene.responsible, ticket.responsible);
-        this.toDocField(doc, TicketIndexer.Lucene.milestone, ticket.milestone);
-        this.toDocField(doc, TicketIndexer.Lucene.topic, ticket.topic);
-        this.toDocField(doc, TicketIndexer.Lucene.status, ticket.status.name());
-        this.toDocField(doc, TicketIndexer.Lucene.comments, ticket.getComments().size());
-        this.toDocField(doc, TicketIndexer.Lucene.type, ticket.type == null ? null : ticket.type.name());
-        this.toDocField(doc, TicketIndexer.Lucene.mergesha, ticket.mergeSha);
-        this.toDocField(doc, TicketIndexer.Lucene.mergeto, ticket.mergeTo);
-        this.toDocField(doc, TicketIndexer.Lucene.labels, StringUtils.flattenStrings(ticket.getLabels(), ";").toLowerCase());
-        this.toDocField(doc, TicketIndexer.Lucene.participants, StringUtils.flattenStrings(ticket.getParticipants(), ";").toLowerCase());
-        this.toDocField(doc, TicketIndexer.Lucene.watchedby, StringUtils.flattenStrings(ticket.getWatchers(), ";").toLowerCase());
-        this.toDocField(doc, TicketIndexer.Lucene.mentions, StringUtils.flattenStrings(ticket.getMentions(), ";").toLowerCase());
-        this.toDocField(doc, TicketIndexer.Lucene.votes, ticket.getVoters().size());
-        this.toDocField(doc, TicketIndexer.Lucene.priority, ticket.priority.getValue());
-        this.toDocField(doc, TicketIndexer.Lucene.severity, ticket.severity.getValue());
+        this.toDocField(doc, Lucene.rid, StringUtils.getSHA1(ticket.repository));
+        this.toDocField(doc, Lucene.did, StringUtils.getSHA1(ticket.repository + ticket.number));
+        this.toDocField(doc, Lucene.project, ticket.project);
+        this.toDocField(doc, Lucene.repository, ticket.repository);
+        this.toDocField(doc, Lucene.number, ticket.number);
+        this.toDocField(doc, Lucene.title, ticket.title);
+        this.toDocField(doc, Lucene.body, ticket.body);
+        this.toDocField(doc, Lucene.created, ticket.created);
+        this.toDocField(doc, Lucene.createdby, ticket.createdBy);
+        this.toDocField(doc, Lucene.updated, ticket.updated);
+        this.toDocField(doc, Lucene.updatedby, ticket.updatedBy);
+        this.toDocField(doc, Lucene.responsible, ticket.responsible);
+        this.toDocField(doc, Lucene.milestone, ticket.milestone);
+        this.toDocField(doc, Lucene.topic, ticket.topic);
+        this.toDocField(doc, Lucene.status, ticket.status.name());
+        this.toDocField(doc, Lucene.comments, ticket.getComments().size());
+        this.toDocField(doc, Lucene.type, ticket.type == null ? null : ticket.type.name());
+        this.toDocField(doc, Lucene.mergesha, ticket.mergeSha);
+        this.toDocField(doc, Lucene.mergeto, ticket.mergeTo);
+        this.toDocField(doc, Lucene.labels, StringUtils.flattenStrings(ticket.getLabels(), ";").toLowerCase());
+        this.toDocField(doc, Lucene.participants, StringUtils.flattenStrings(ticket.getParticipants(), ";").toLowerCase());
+        this.toDocField(doc, Lucene.watchedby, StringUtils.flattenStrings(ticket.getWatchers(), ";").toLowerCase());
+        this.toDocField(doc, Lucene.mentions, StringUtils.flattenStrings(ticket.getMentions(), ";").toLowerCase());
+        this.toDocField(doc, Lucene.votes, ticket.getVoters().size());
+        this.toDocField(doc, Lucene.priority, ticket.priority.getValue());
+        this.toDocField(doc, Lucene.severity, ticket.severity.getValue());
         List<String> attachments = new ArrayList();
         Iterator var4 = ticket.getAttachments().iterator();
 
@@ -354,34 +354,34 @@ public class TicketIndexer {
             attachments.add(attachment.name.toLowerCase());
         }
 
-        this.toDocField(doc, TicketIndexer.Lucene.attachments, StringUtils.flattenStrings(attachments, ";"));
+        this.toDocField(doc, Lucene.attachments, StringUtils.flattenStrings(attachments, ";"));
         List<Patchset> patches = ticket.getPatchsets();
         if (!patches.isEmpty()) {
-            this.toDocField(doc, TicketIndexer.Lucene.patchsets, patches.size());
+            this.toDocField(doc, Lucene.patchsets, patches.size());
             Patchset patchset = (Patchset) patches.get(patches.size() - 1);
             String flat = patchset.number + ":" + patchset.rev + ":" + patchset.tip + ":" + patchset.base + ":" + patchset.commits;
-            doc.add(new Field(TicketIndexer.Lucene.patchset.name(), flat, TextField.TYPE_STORED));
+            doc.add(new Field(Lucene.patchset.name(), flat, TextField.TYPE_STORED));
         }
 
-        doc.add(new TextField(TicketIndexer.Lucene.content.name(), ticket.toIndexableString(), Store.NO));
+        doc.add(new TextField(Lucene.content.name(), ticket.toIndexableString(), Store.NO));
         return doc;
     }
 
-    private void toDocField(Document doc, TicketIndexer.Lucene lucene, Date value) {
+    private void toDocField(Document doc, Lucene lucene, Date value) {
         if (value != null) {
             doc.add(new LongField(lucene.name(), value.getTime(), Store.YES));
         }
     }
 
-    private void toDocField(Document doc, TicketIndexer.Lucene lucene, long value) {
+    private void toDocField(Document doc, Lucene lucene, long value) {
         doc.add(new LongField(lucene.name(), value, Store.YES));
     }
 
-    private void toDocField(Document doc, TicketIndexer.Lucene lucene, int value) {
+    private void toDocField(Document doc, Lucene lucene, int value) {
         doc.add(new IntField(lucene.name(), value, Store.YES));
     }
 
-    private void toDocField(Document doc, TicketIndexer.Lucene lucene, String value) {
+    private void toDocField(Document doc, Lucene lucene, String value) {
         if (!StringUtils.isEmpty(value)) {
             doc.add(new Field(lucene.name(), value, TextField.TYPE_STORED));
         }
@@ -389,33 +389,33 @@ public class TicketIndexer {
 
     private QueryResult docToQueryResult(Document doc) throws ParseException {
         QueryResult result = new QueryResult();
-        result.project = this.unpackString(doc, TicketIndexer.Lucene.project);
-        result.repository = this.unpackString(doc, TicketIndexer.Lucene.repository);
-        result.number = this.unpackLong(doc, TicketIndexer.Lucene.number);
-        result.createdBy = this.unpackString(doc, TicketIndexer.Lucene.createdby);
-        result.createdAt = this.unpackDate(doc, TicketIndexer.Lucene.created);
-        result.updatedBy = this.unpackString(doc, TicketIndexer.Lucene.updatedby);
-        result.updatedAt = this.unpackDate(doc, TicketIndexer.Lucene.updated);
-        result.title = this.unpackString(doc, TicketIndexer.Lucene.title);
-        result.body = this.unpackString(doc, TicketIndexer.Lucene.body);
-        result.status = Status.fromObject(this.unpackString(doc, TicketIndexer.Lucene.status), Status.New);
-        result.responsible = this.unpackString(doc, TicketIndexer.Lucene.responsible);
-        result.milestone = this.unpackString(doc, TicketIndexer.Lucene.milestone);
-        result.topic = this.unpackString(doc, TicketIndexer.Lucene.topic);
-        result.type = Type.fromObject(this.unpackString(doc, TicketIndexer.Lucene.type), Type.defaultType);
-        result.mergeSha = this.unpackString(doc, TicketIndexer.Lucene.mergesha);
-        result.mergeTo = this.unpackString(doc, TicketIndexer.Lucene.mergeto);
-        result.commentsCount = this.unpackInt(doc, TicketIndexer.Lucene.comments);
-        result.votesCount = this.unpackInt(doc, TicketIndexer.Lucene.votes);
-        result.attachments = this.unpackStrings(doc, TicketIndexer.Lucene.attachments);
-        result.labels = this.unpackStrings(doc, TicketIndexer.Lucene.labels);
-        result.participants = this.unpackStrings(doc, TicketIndexer.Lucene.participants);
-        result.watchedby = this.unpackStrings(doc, TicketIndexer.Lucene.watchedby);
-        result.mentions = this.unpackStrings(doc, TicketIndexer.Lucene.mentions);
-        result.priority = Priority.fromObject(this.unpackInt(doc, TicketIndexer.Lucene.priority), Priority.defaultPriority);
-        result.severity = Severity.fromObject(this.unpackInt(doc, TicketIndexer.Lucene.severity), Severity.defaultSeverity);
-        if (!StringUtils.isEmpty(doc.get(TicketIndexer.Lucene.patchset.name()))) {
-            String[] values = doc.get(TicketIndexer.Lucene.patchset.name()).split(":", 5);
+        result.project = this.unpackString(doc, Lucene.project);
+        result.repository = this.unpackString(doc, Lucene.repository);
+        result.number = this.unpackLong(doc, Lucene.number);
+        result.createdBy = this.unpackString(doc, Lucene.createdby);
+        result.createdAt = this.unpackDate(doc, Lucene.created);
+        result.updatedBy = this.unpackString(doc, Lucene.updatedby);
+        result.updatedAt = this.unpackDate(doc, Lucene.updated);
+        result.title = this.unpackString(doc, Lucene.title);
+        result.body = this.unpackString(doc, Lucene.body);
+        result.status = Status.fromObject(this.unpackString(doc, Lucene.status), Status.New);
+        result.responsible = this.unpackString(doc, Lucene.responsible);
+        result.milestone = this.unpackString(doc, Lucene.milestone);
+        result.topic = this.unpackString(doc, Lucene.topic);
+        result.type = Type.fromObject(this.unpackString(doc, Lucene.type), Type.defaultType);
+        result.mergeSha = this.unpackString(doc, Lucene.mergesha);
+        result.mergeTo = this.unpackString(doc, Lucene.mergeto);
+        result.commentsCount = this.unpackInt(doc, Lucene.comments);
+        result.votesCount = this.unpackInt(doc, Lucene.votes);
+        result.attachments = this.unpackStrings(doc, Lucene.attachments);
+        result.labels = this.unpackStrings(doc, Lucene.labels);
+        result.participants = this.unpackStrings(doc, Lucene.participants);
+        result.watchedby = this.unpackStrings(doc, Lucene.watchedby);
+        result.mentions = this.unpackStrings(doc, Lucene.mentions);
+        result.priority = Priority.fromObject(this.unpackInt(doc, Lucene.priority), Priority.defaultPriority);
+        result.severity = Severity.fromObject(this.unpackInt(doc, Lucene.severity), Severity.defaultSeverity);
+        if (!StringUtils.isEmpty(doc.get(Lucene.patchset.name()))) {
+            String[] values = doc.get(Lucene.patchset.name()).split(":", 5);
             Patchset patchset = new Patchset();
             patchset.number = Integer.parseInt(values[0]);
             patchset.rev = Integer.parseInt(values[1]);
@@ -428,15 +428,15 @@ public class TicketIndexer {
         return result;
     }
 
-    private String unpackString(Document doc, TicketIndexer.Lucene lucene) {
+    private String unpackString(Document doc, Lucene lucene) {
         return doc.get(lucene.name());
     }
 
-    private List<String> unpackStrings(Document doc, TicketIndexer.Lucene lucene) {
+    private List<String> unpackStrings(Document doc, Lucene lucene) {
         return !StringUtils.isEmpty(doc.get(lucene.name())) ? StringUtils.getStringsFromValue(doc.get(lucene.name()), ";") : null;
     }
 
-    private Date unpackDate(Document doc, TicketIndexer.Lucene lucene) {
+    private Date unpackDate(Document doc, Lucene lucene) {
         String val = doc.get(lucene.name());
         if (!StringUtils.isEmpty(val)) {
             long time = Long.parseLong(val);
@@ -447,7 +447,7 @@ public class TicketIndexer {
         }
     }
 
-    private long unpackLong(Document doc, TicketIndexer.Lucene lucene) {
+    private long unpackLong(Document doc, Lucene lucene) {
         String val = doc.get(lucene.name());
         if (StringUtils.isEmpty(val)) {
             return 0L;
@@ -457,7 +457,7 @@ public class TicketIndexer {
         }
     }
 
-    private int unpackInt(Document doc, TicketIndexer.Lucene lucene) {
+    private int unpackInt(Document doc, Lucene lucene) {
         String val = doc.get(lucene.name());
         if (StringUtils.isEmpty(val)) {
             return 0;
@@ -468,40 +468,40 @@ public class TicketIndexer {
     }
 
     public static enum Lucene {
-        rid(org.apache.lucene.search.SortField.Type.STRING),
-        did(org.apache.lucene.search.SortField.Type.STRING),
-        project(org.apache.lucene.search.SortField.Type.STRING),
-        repository(org.apache.lucene.search.SortField.Type.STRING),
-        number(org.apache.lucene.search.SortField.Type.LONG),
-        title(org.apache.lucene.search.SortField.Type.STRING),
-        body(org.apache.lucene.search.SortField.Type.STRING),
-        topic(org.apache.lucene.search.SortField.Type.STRING),
-        created(org.apache.lucene.search.SortField.Type.LONG),
-        createdby(org.apache.lucene.search.SortField.Type.STRING),
-        updated(org.apache.lucene.search.SortField.Type.LONG),
-        updatedby(org.apache.lucene.search.SortField.Type.STRING),
-        responsible(org.apache.lucene.search.SortField.Type.STRING),
-        milestone(org.apache.lucene.search.SortField.Type.STRING),
-        status(org.apache.lucene.search.SortField.Type.STRING),
-        type(org.apache.lucene.search.SortField.Type.STRING),
-        labels(org.apache.lucene.search.SortField.Type.STRING),
-        participants(org.apache.lucene.search.SortField.Type.STRING),
-        watchedby(org.apache.lucene.search.SortField.Type.STRING),
-        mentions(org.apache.lucene.search.SortField.Type.STRING),
-        attachments(org.apache.lucene.search.SortField.Type.INT),
-        content(org.apache.lucene.search.SortField.Type.STRING),
-        patchset(org.apache.lucene.search.SortField.Type.STRING),
-        comments(org.apache.lucene.search.SortField.Type.INT),
-        mergesha(org.apache.lucene.search.SortField.Type.STRING),
-        mergeto(org.apache.lucene.search.SortField.Type.STRING),
-        patchsets(org.apache.lucene.search.SortField.Type.INT),
-        votes(org.apache.lucene.search.SortField.Type.INT),
-        priority(org.apache.lucene.search.SortField.Type.INT),
-        severity(org.apache.lucene.search.SortField.Type.INT);
+        rid(SortField.Type.STRING),
+        did(SortField.Type.STRING),
+        project(SortField.Type.STRING),
+        repository(SortField.Type.STRING),
+        number(SortField.Type.LONG),
+        title(SortField.Type.STRING),
+        body(SortField.Type.STRING),
+        topic(SortField.Type.STRING),
+        created(SortField.Type.LONG),
+        createdby(SortField.Type.STRING),
+        updated(SortField.Type.LONG),
+        updatedby(SortField.Type.STRING),
+        responsible(SortField.Type.STRING),
+        milestone(SortField.Type.STRING),
+        status(SortField.Type.STRING),
+        type(SortField.Type.STRING),
+        labels(SortField.Type.STRING),
+        participants(SortField.Type.STRING),
+        watchedby(SortField.Type.STRING),
+        mentions(SortField.Type.STRING),
+        attachments(SortField.Type.INT),
+        content(SortField.Type.STRING),
+        patchset(SortField.Type.STRING),
+        comments(SortField.Type.INT),
+        mergesha(SortField.Type.STRING),
+        mergeto(SortField.Type.STRING),
+        patchsets(SortField.Type.INT),
+        votes(SortField.Type.INT),
+        priority(SortField.Type.INT),
+        severity(SortField.Type.INT);
 
-        final org.apache.lucene.search.SortField.Type fieldType;
+        final SortField.Type fieldType;
 
-        private Lucene(org.apache.lucene.search.SortField.Type fieldType) {
+        private Lucene(SortField.Type fieldType) {
             this.fieldType = fieldType;
         }
 
@@ -546,12 +546,12 @@ public class TicketIndexer {
             return value;
         }
 
-        public static TicketIndexer.Lucene fromString(String value) {
-            TicketIndexer.Lucene[] var1 = values();
+        public static Lucene fromString(String value) {
+            Lucene[] var1 = values();
             int var2 = var1.length;
 
             for (int var3 = 0; var3 < var2; ++var3) {
-                TicketIndexer.Lucene field = var1[var3];
+                Lucene field = var1[var3];
                 if (field.name().equalsIgnoreCase(value)) {
                     return field;
                 }

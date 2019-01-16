@@ -17,8 +17,12 @@ package com.gitblit;
 
 import com.gitblit.console.ConsoleContext;
 import com.gitblit.servlet.GitblitContext;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GitBlitServer is the embedded Jetty server for Gitblit GO. This class starts
@@ -31,6 +35,49 @@ import java.io.File;
  * @author James Moger
  */
 public class ConsoleServer extends GitBlitServer {
+
+    public static void main(String... args) {
+        GitBlitServer server = new ConsoleServer();
+        List<String> filtered = new ArrayList();
+        String folder = "data";
+
+        for (int i = 0; i < args.length; ++i) {
+            String arg = args[i];
+            if (arg.equals("--baseFolder")) {
+                if (i + 1 == args.length) {
+                    System.out.println("Invalid --baseFolder parameter!");
+                    System.exit(-1);
+                } else if (!".".equals(args[i + 1])) {
+                    folder = args[i + 1];
+                }
+
+                ++i;
+            } else {
+                filtered.add(arg);
+            }
+        }
+
+        Params.baseFolder = folder;
+        Params params = new Params();
+        CmdLineParser parser = new CmdLineParser(params);
+
+        try {
+            parser.parseArgument(filtered);
+            if (params.help) {
+                server.usage(parser, (CmdLineException) null);
+            }
+        } catch (CmdLineException var7) {
+            server.usage(parser, var7);
+        }
+
+        if (params.stop) {
+            server.stop(params);
+        } else {
+            server.start(params);
+        }
+
+    }
+
     protected GitblitContext newGitblit(IStoredSettings settings, File baseFolder) {
         return new ConsoleContext(settings, baseFolder);
     }
