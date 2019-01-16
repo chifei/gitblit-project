@@ -1,5 +1,6 @@
 package com.gitblit.console.servlet;
 
+import com.gitblit.console.servlet.model.RepositoryTreePath;
 import com.gitblit.console.servlet.model.TreePathModel;
 import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.models.PathModel;

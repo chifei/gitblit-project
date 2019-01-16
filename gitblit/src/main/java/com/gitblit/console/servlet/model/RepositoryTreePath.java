@@ -1,4 +1,4 @@
-package com.gitblit.console.servlet;
+package com.gitblit.console.servlet.model;
 
 import com.google.common.collect.Maps;
 
@@ -7,8 +7,8 @@ import java.util.Map;
 /**
  * @author miller
  */
-class RepositoryTreePath {
-    static Map<String, String> parse(String pathInfo) {
+public class RepositoryTreePath {
+    public static Map<String, String> parse(String pathInfo) {
         // /r/h/f
         Map<String, String> params = Maps.newHashMap();
         int start = 1;

@@ -1,5 +1,6 @@
 package com.gitblit.console.servlet;
 
+import com.gitblit.console.servlet.model.RepositoryTreePath;
 import org.junit.Test;
 
 import java.util.Map;
