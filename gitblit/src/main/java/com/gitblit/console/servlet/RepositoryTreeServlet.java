@@ -49,9 +49,7 @@ public class RepositoryTreeServlet extends JsonServlet {
         Repository r = repositoryManager.getRepository(params.get("r"));
         String path = params.get("f");
         if (path == null) {
-            httpServletResponse.setStatus(HttpStatus.SC_BAD_REQUEST);
-            httpServletResponse.getWriter().print("invalid path");
-            return;
+            path = "";
         }
         RevCommit commit = getCommit(r, params);
         List<TreePathModel> paths = JGitUtils.getFilesInPath2(r, path, commit)
