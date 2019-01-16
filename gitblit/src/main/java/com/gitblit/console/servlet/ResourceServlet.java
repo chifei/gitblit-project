@@ -35,13 +35,5 @@ public class ResourceServlet extends HttpServlet {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        /*response.setContentType("text/html");
-
-        try (InputStream inputStream = loader.getResourceAsStream();
-             ServletOutputStream outputStream = response.getOutputStream()) {
-            ByteStreams.copy(inputStream, outputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
     }
 }
