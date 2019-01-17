@@ -27,10 +27,7 @@ public class RepositoryRevertServlet extends JsonServlet {
         }
         try {
             git.close();
-            String workSpace = ConsoleContext.WORK_SPACE_DIR + repository + "/";
-            /*String gitFile = ConsoleContext.WORK_SPACE_DIR + repository + "/.git";
-            FileUtils.forceDeleteOnExit(new File(gitFile));
-            FileUtils.deleteDirectory(new File(workSpace));*/
+            String workSpace = ConsoleContext.WORK_SPACE_DIR + repository + File.separator;
             FileUtils.forceDelete(new File(workSpace));
             ConsoleContext.WORK_SPACE.remove(repository);
         } catch (Exception e) {

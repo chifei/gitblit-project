@@ -35,4 +35,18 @@ public class TreePathModel implements Serializable {
         this.isTree = FileMode.TREE.equals(this.mode);
         this.isFile = FileMode.REGULAR_FILE.equals(this.mode) || FileMode.EXECUTABLE_FILE.equals(this.mode) || FileMode.MISSING.equals(this.mode) && !this.isSymlink && !this.isSubmodule && !this.isTree;
     }
+
+    public TreePathModel(String name, String path, long size, boolean isTree, boolean isFile) {
+        this.name = name;
+        this.path = path;
+        this.size = size;
+        this.isFile = isFile;
+        this.isTree = isTree;
+        this.filestoreOid = null;
+        this.mode = 0;
+        this.objectId = null;
+        this.commitId = null;
+        this.isSymlink = false;
+        this.isSubmodule = false;
+    }
 }

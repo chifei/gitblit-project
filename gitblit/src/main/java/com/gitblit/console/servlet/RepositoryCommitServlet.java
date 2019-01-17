@@ -31,9 +31,10 @@ public class RepositoryCommitServlet extends JsonServlet {
             git.add().addFilepattern(".").call();
             git.commit().setMessage("commit-" + UUID.randomUUID().toString()).call();
             git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin")).call();
-            String workSpace = ConsoleContext.WORK_SPACE_DIR + repository + "/";
+            String workSpace = ConsoleContext.WORK_SPACE_DIR + repository + File.separator;
             git.close();
             FileUtils.deleteDirectory(new File(workSpace));
+            ConsoleContext.WORK_SPACE.remove(repository);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

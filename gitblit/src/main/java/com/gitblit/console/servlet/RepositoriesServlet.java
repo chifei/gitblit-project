@@ -49,27 +49,4 @@ public class RepositoriesServlet extends JsonServlet {
         List<RepositoryModel> repositories = gitblit.getRepositoryModels();
         this.serialize(response, repositories);
     }
-
-    /*private void cloneRepositories(List<RepositoryModel> repositories) {
-        if (free && !loaded) {
-            try {
-                free = false;
-                for (RepositoryModel r : repositories) {
-                    String master = r.HEAD.substring(r.HEAD.lastIndexOf("/") + 1);
-                    File repoDir = new File(ConsoleContext.WORK_SPACE_DIR + r.name + "/" + master);
-                    FileUtils.deleteDirectory(repoDir);
-                    Git git = Git.cloneRepository().setURI(ConsoleContext.BASE_GIT_URI + r.name)
-                        .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
-                        .setDirectory(repoDir)
-                        .call();
-                    LOCAL_REPOSITORIES.put(r.name, git);
-                }
-                loaded = true;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                free = true;
-            }
-        }
-    }*/
 }

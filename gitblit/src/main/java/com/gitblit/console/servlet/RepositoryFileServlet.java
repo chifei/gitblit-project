@@ -68,7 +68,7 @@ public class RepositoryFileServlet extends JsonServlet {
         Git workSpace = ConsoleContext.WORK_SPACE.get(params.get("r"));
         Map<String, String> map = Maps.newHashMap();
         if (workSpace != null) {
-            String path = ConsoleContext.WORK_SPACE_DIR + params.get("r") + "/" + params.get("f");
+            String path = ConsoleContext.WORK_SPACE_DIR + params.get("r") + File.separator + params.get("f");
             File workSpaceFile = new File(path);
             StringWriter stringWriter = new StringWriter();
             try (InputStream in = new FileInputStream(workSpaceFile)) {
@@ -123,13 +123,14 @@ public class RepositoryFileServlet extends JsonServlet {
             }
 
         }
-        String path = ConsoleContext.WORK_SPACE_DIR + repo + "/" + params.get("f");
+        String path = ConsoleContext.WORK_SPACE_DIR + repo + File.separator + params.get("f");
         File workSpaceFile = new File(path);
         StringWriter stringWriter = new StringWriter();
         IOUtils.copy(request.getInputStream(), stringWriter, Charsets.UTF_8.name());
         UpdateFileRequest updateFileRequest = JsonUtils.fromJsonString(stringWriter.toString(), UpdateFileRequest.class);
         try (OutputStream out = new FileOutputStream(workSpaceFile)) {
             ByteStreams.copy(new ByteArrayInputStream(updateFileRequest.content.getBytes(Charsets.UTF_8.name())), out);
+            out.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
