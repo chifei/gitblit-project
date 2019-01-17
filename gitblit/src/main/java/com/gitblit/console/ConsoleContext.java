@@ -19,11 +19,11 @@ import java.util.Map;
 public class ConsoleContext extends GitblitContext {
     public static final Map<String, Git> WORK_SPACE = Maps.newConcurrentMap();
     public static final String BASE_GIT_URI = "ssh://admin@localhost:29418/";
-    public static final String BASE_CLONE_DIR;
+    public static final String WORK_SPACE_DIR;
 
     static {
         File tempDir = Files.createTempDir();
-        BASE_CLONE_DIR = tempDir.getAbsolutePath() + File.separator;
+        WORK_SPACE_DIR = tempDir.getAbsolutePath() + File.separator;
     }
 
     public ConsoleContext(IStoredSettings settings, File baseFolder) {

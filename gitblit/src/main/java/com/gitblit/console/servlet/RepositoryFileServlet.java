@@ -13,6 +13,7 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
+import org.apache.wicket.util.file.Files;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -67,7 +68,7 @@ public class RepositoryFileServlet extends JsonServlet {
         Git workSpace = ConsoleContext.WORK_SPACE.get(params.get("r"));
         Map<String, String> map = Maps.newHashMap();
         if (workSpace != null) {
-            String path = ConsoleContext.BASE_CLONE_DIR + params.get("r") + "/" + params.get("h") + "/" + params.get("f");
+            String path = ConsoleContext.WORK_SPACE_DIR + params.get("r") + "/" + params.get("f");
             File workSpaceFile = new File(path);
             StringWriter stringWriter = new StringWriter();
             try (InputStream in = new FileInputStream(workSpaceFile)) {
@@ -109,8 +110,9 @@ public class RepositoryFileServlet extends JsonServlet {
         }
         Git workSpace = ConsoleContext.WORK_SPACE.get(repo);
         if (workSpace == null) {
-            File repoDir = new File(ConsoleContext.BASE_CLONE_DIR + repo + "/master");
+            File repoDir = new File(ConsoleContext.WORK_SPACE_DIR + repo);
             try {
+                Files.remove(repoDir);
                 workSpace = Git.cloneRepository().setURI(ConsoleContext.BASE_GIT_URI + repo)
                     .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
                     .setDirectory(repoDir)
@@ -121,7 +123,7 @@ public class RepositoryFileServlet extends JsonServlet {
             }
 
         }
-        String path = ConsoleContext.BASE_CLONE_DIR + repo + "/" + params.get("h") + "/" + params.get("f");
+        String path = ConsoleContext.WORK_SPACE_DIR + repo + "/" + params.get("f");
         File workSpaceFile = new File(path);
         StringWriter stringWriter = new StringWriter();
         IOUtils.copy(request.getInputStream(), stringWriter, Charsets.UTF_8.name());

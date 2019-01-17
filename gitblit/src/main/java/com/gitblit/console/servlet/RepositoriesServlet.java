@@ -36,7 +36,7 @@ public class RepositoriesServlet extends JsonServlet {
     public RepositoriesServlet(IStoredSettings settings, IGitblit gitblit) {
         this.settings = settings;
         this.gitblit = gitblit;
-        logger.info("base clone dir={}", ConsoleContext.BASE_CLONE_DIR);
+        logger.info("base clone dir={}", ConsoleContext.WORK_SPACE_DIR);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RepositoriesServlet extends JsonServlet {
                 free = false;
                 for (RepositoryModel r : repositories) {
                     String master = r.HEAD.substring(r.HEAD.lastIndexOf("/") + 1);
-                    File repoDir = new File(ConsoleContext.BASE_CLONE_DIR + r.name + "/" + master);
+                    File repoDir = new File(ConsoleContext.WORK_SPACE_DIR + r.name + "/" + master);
                     FileUtils.deleteDirectory(repoDir);
                     Git git = Git.cloneRepository().setURI(ConsoleContext.BASE_GIT_URI + r.name)
                         .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
