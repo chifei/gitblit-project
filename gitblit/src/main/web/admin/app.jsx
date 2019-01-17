@@ -32,7 +32,8 @@ class Page extends React.Component {
                 <Switch>
                     <Route exact path="/console/" component={RepoList}/>
                     <Route exact path="/console/repo/:repositoryName" component={Repository}/>
-                    <Route exact path="/console/editor/:path" component={Editor}/>
+                    <Route path="/console/repo/:repositoryName/:path" component={Repository}/>
+                    <Route path="/console/editor/:path" component={Editor}/>
                     <Route component={RepoList}/>
                 </Switch>
             </Router>

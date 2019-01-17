@@ -16,31 +16,66 @@ const availableModes = ["java", "javascript", "html", "css"];
 export default class Editor extends React.Component {
     constructor(props) {
         super(props);
-        const {repositoryName, branch, name} = props.location.state;
+        const {repositoryName, branch, name, isNew} = props.location.state;
         const nameArray = name.split(".");
         const fileExt = nameArray[nameArray.length - 1];
         let mode = "text";
         if (fileExt && availableModes.indexOf(fileExt.toLocaleLowerCase()) >= 0) {
             mode = fileExt;
         }
+        const path = props.location.pathname.replace("/console/editor", "");
+
         this.state = {
-            path: props.match.params.path,
+            path,
             repositoryName,
             branch,
+            isNew,
             name,
             content: "",
-            mode
+            mode,
+            folders: []
         };
     }
 
     componentDidMount() {
-        fetch(`/api/repository/file/${this.state.repositoryName}/${this.state.branch}/${this.state.path}`).then((data) => {
-            this.setState({content: data.content});
+        if (this.state.path) {
+            this.changeFolder(this.state.path);
+        }
+        if (!this.state.isNew) {
+            fetch(`/api/repository/file/${this.state.repositoryName}/${this.state.branch}/${this.state.path}`).then((data) => {
+                this.setState({content: data.content});
+            });
+        }
+    }
+
+    changeFolder(path) {
+        const paths = path.split("/");
+        let newPath = "";
+        const folders = [];
+        paths.forEach((p) => {
+            if (p) {
+                newPath += path + "/";
+                folders.push(newPath);
+            }
+        });
+        this.setState({
+            path,
+            folders
         });
     }
 
     onChange(content) {
         this.setState({content});
+    }
+
+    submit() {
+        fetch("/", {
+            path: this.state.path,
+            repositoryName: this.state.repositoryName,
+            content: this.state.content
+        }).then((data) => {
+            this.props.history.push(`/console/repo/${this.state.repositoryName}`);
+        });
     }
 
     render() {
@@ -49,14 +84,25 @@ export default class Editor extends React.Component {
                 <Layout.Row>
                     <Layout.Col span="16">
                         <Breadcrumb separator="/">
-                            <Breadcrumb.Item><Link to="/">Home</Link></Breadcrumb.Item>
-                            <Breadcrumb.Item><Link to="/project">Project</Link></Breadcrumb.Item>
-                            <Breadcrumb.Item>Project {this.state.id}</Breadcrumb.Item>
+                            <Breadcrumb.Item>
+                                <Link to="/console">Home</Link>
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item>
+                                <Link to={`/console/repo/${this.state.repositoryName}`}>{this.state.repositoryName}</Link>
+                            </Breadcrumb.Item>
+                            {this.state.folders.map(folder =>
+                                <Breadcrumb.Item key={folder}>
+                                    <Link to={`/console/repo/${this.state.repositoryName}/${folder}`}>{this.state.repositoryName}</Link>
+                                </Breadcrumb.Item>)
+
+                            }
+
+
                         </Breadcrumb>
                     </Layout.Col>
                     <Layout.Col span="8">
                         <div className="head-operation">
-                            <Button class="primary" size="small">Save </Button>
+                            <Button class="primary" size="small" onClick={() => this.submit()}>Save </Button>
                         </div>
                     </Layout.Col>
                 </Layout.Row>
@@ -81,6 +127,7 @@ export default class Editor extends React.Component {
 }
 
 Editor.propTypes = {
+    history: PropTypes.object,
     location: PropTypes.object,
     match: PropTypes.object
 };

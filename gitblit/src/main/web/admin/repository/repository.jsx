@@ -1,24 +1,26 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {Breadcrumb, Button, Dropdown, Layout, Table} from "element-react";
+import {Breadcrumb, Button, Layout, Table} from "element-react";
 import {Link} from "react-router-dom";
 import {library} from "@fortawesome/fontawesome-svg-core";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faFile, faPlus} from "@fortawesome/free-solid-svg-icons";
+import {faFile, faPlus, faReply} from "@fortawesome/free-solid-svg-icons";
 
 import CreateFile from "./create-file";
 
 library.add(faPlus);
 library.add(faFile);
+library.add(faReply);
 
 export default class Repository extends React.Component {
     constructor(props) {
         super(props);
+        const path = props.match.params.path;
         this.state = {
             repositoryName: props.match.params.repositoryName,
+            path,
             branch: "master",
             creating: false,
-            createType: null,
             columns: [
                 {
                     label: "",
@@ -26,6 +28,8 @@ export default class Repository extends React.Component {
                     render: (data) => {
                         if (data.isTree && !data.isFile) {
                             return <FontAwesomeIcon icon="folder"/>;
+                        } else if (data.isToUp) {
+                            return <a href="#" onClick={() => this.changeFolder(data.path)}><FontAwesomeIcon icon="reply"/>...</a>;
                         }
                         return <FontAwesomeIcon icon="file"/>;
                     }
@@ -43,7 +47,7 @@ export default class Repository extends React.Component {
                                 }
                             }}>{data.name}</Link>;
                         }
-                        return data.name;
+                        return <a href="#" onClick={() => this.changeFolder(data.path)}>{data.name}</a>;
                     }
                 },
                 {
@@ -51,54 +55,73 @@ export default class Repository extends React.Component {
                     prop: "date"
                 }
             ],
-            data: [{
-                date: "2019-05-02",
-                name: "Fold 1",
-                path: "f1",
-                isTree: true,
-                isFile: false
-            }, {
-                date: "2019-05-04",
-                name: "Fold 2",
-                path: "f2",
-                isTree: true,
-                isFile: false
-            }, {
-                date: "2019-05-01",
-                name: "File 1",
-                path: "f1/s1",
-                isTree: false,
-                isFile: true
-            }, {
-                date: "2019-05-03",
-                name: "File 2",
-                path: "f1/s2",
-                isTree: false,
-                isFile: true
-            }]
+            data: []
         };
     }
 
     componentDidMount() {
+        if (this.state.path) {
+            this.changeFolder(this.state.path);
+        }
         this.reload();
     }
 
     reload() {
-        fetch(`/api/repository/tree/${this.state.repositoryName}/${this.state.branch}/`).then((data) => {
+        let url = `/api/repository/tree/${this.state.repositoryName}/${this.state.branch}`;
+        if (this.state.path) {
+            url += "/" + this.state.path;
+        }
+        fetch(url).then((response) => {
+            let data = [];
+            if (this.state.path) {
+                data.push({
+                    name: null,
+                    path: this.state.path.substr(0, this.state.path.lastIndexOf("/")),
+                    isToUp: true
+                });
+            }
+            data = data.concat(response);
             this.setState({data});
         });
     }
 
-    createFile(createType) {
-        this.setState({
-            creating: true,
-            createType
+    createFile() {
+        this.setState({creating: true});
+    }
+
+    onCreate(name) {
+        this.props.history.push({
+            pathname: `/console/editor/${name}`,
+            state: {
+                name: name,
+                repositoryName: this.state.repositoryName,
+                branch: "master",
+                isNew: true
+            }
         });
     }
 
-    onCreate() {
-        this.setState({creating: false});
-        this.reload();
+    changeFolder(path) {
+        const paths = path.split("/");
+        let newPath = "";
+        const folders = [];
+        paths.forEach((p) => {
+            if (p) {
+                if (newPath) {
+                    newPath += "/";
+                }
+                newPath += p;
+                folders.push(newPath);
+            }
+        });
+        this.setState({
+            path,
+            folders
+        }, () => {
+            this.props.history.push(`/console/repo/${this.state.repositoryName}/${path}`);
+            this.reload();
+        });
+
     }
 
     onCancel() {
@@ -111,25 +134,19 @@ export default class Repository extends React.Component {
                 <Layout.Row>
                     <Layout.Col span="16">
                         <Breadcrumb separator="/">
-                            <Breadcrumb.Item><Link to="/">Home</Link></Breadcrumb.Item>
-                            <Breadcrumb.Item><Link to="/project">Project</Link></Breadcrumb.Item>
-                            <Breadcrumb.Item>Project {this.state.id}</Breadcrumb.Item>
+                            <Breadcrumb.Item><Link to="/console">Home</Link></Breadcrumb.Item>
+                            <Breadcrumb.Item>
+                                <a href="#" onClick={() => this.changeFolder("")}>{this.state.repositoryName}</a>
+                            </Breadcrumb.Item>
+                            {this.state.folders && this.state.folders.map(p =>
+                                <Breadcrumb.Item key={p}><a href="#" onClick={() => this.changeFolder(p)}>{p.split("/")[p.split("/").length - 1]}</a></Breadcrumb.Item>
+                            )}
+
                         </Breadcrumb>
                     </Layout.Col>
                     <Layout.Col span="8">
                         <div className="head-operation">
-                            <Dropdown menu={(
-                                <Dropdown.Menu>
-                                    <Dropdown.Item>
-                                        <span onClick={() => this.createFile("file")}>Create File</span>
-                                    </Dropdown.Item>
-                                    <Dropdown.Item>
-                                        <span onClick={() => this.createFile("folder")}>Create Folder</span>
-                                    </Dropdown.Item>
-                                </Dropdown.Menu>
-                            )}>
-                                <Button size="small">Create </Button>
-                            </Dropdown>
+                            <Button size="small" onClick={() => this.createFile()}>New File </Button>
                         </div>
                     </Layout.Col>
                 </Layout.Row>
@@ -144,7 +161,7 @@ export default class Repository extends React.Component {
                     </Layout.Col>
                 </Layout.Row>
                 {this.state.creating &&
-                <CreateFile type={this.state.createType} onCreate={() => this.onCreate()} onCancel={() => this.onCancel()}/>
+                <CreateFile onCreate={value => this.onCreate(value)} onCancel={() => this.onCancel()}/>
                 }
             </div>
         );
@@ -152,4 +169,7 @@ export default class Repository extends React.Component {
 
 }
 
-Repository.propTypes = {match: PropTypes.object};
+Repository.propTypes = {
+    history: PropTypes.object,
+    match: PropTypes.object
+};

@@ -5,10 +5,7 @@ import {Button, Dialog, Form, Input} from "element-react";
 export default class CreateFile extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            name: null,
-            type: props.type // file: create file;folder: create folder
-        };
+        this.state = {name: null};
     }
 
     createFile() {
@@ -20,7 +17,7 @@ export default class CreateFile extends React.Component {
     }
 
     onCreate() {
-        this.props.onCreate();
+        this.props.onCreate(this.state.name);
     }
 
     changeName(name) {
@@ -30,7 +27,7 @@ export default class CreateFile extends React.Component {
     render() {
         return (
             <Dialog
-                title={"Create " + this.state.type}
+                title={"Create File"}
                 visible={true}
                 onCancel={() => this.onCancel()}
             >
