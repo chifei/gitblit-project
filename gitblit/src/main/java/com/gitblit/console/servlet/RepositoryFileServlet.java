@@ -1,5 +1,6 @@
 package com.gitblit.console.servlet;
 
+import com.gitblit.console.ConsoleContext;
 import com.gitblit.console.servlet.model.RepositoryTreePath;
 import com.gitblit.console.servlet.model.UpdateFileRequest;
 import com.gitblit.manager.IRepositoryManager;
@@ -12,8 +13,10 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -29,7 +32,6 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.Map;
 
-import static com.gitblit.console.servlet.RepositoriesServlet.BASE_CLONE_DIR;
 
 /**
  * @author chi
@@ -62,33 +64,40 @@ public class RepositoryFileServlet extends JsonServlet {
             response.getWriter().print("invalid branch");
             return;
         }
-        /*Repository r = repositoryManager.getRepository(params.get("r"));
-        final String blobPath = params.get("f");
-        RevCommit commit = getCommit(r, params);
-
-        String source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, Charsets.UTF_8.name());
-        if (source == null) {
-            response.setStatus(HttpStatus.SC_NOT_FOUND);
-            response.getWriter().print("missing file");
-            return;
-        }*/
-        String path = BASE_CLONE_DIR + params.get("r") + "/" + params.get("h") + "/" + params.get("f");
-        StringWriter stringWriter = new StringWriter();
-        try (InputStream in = new FileInputStream(new File(path))) {
-            IOUtils.copy(in, stringWriter, Charsets.UTF_8.name());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Git workSpace = ConsoleContext.WORK_SPACE.get(params.get("r"));
         Map<String, String> map = Maps.newHashMap();
-        map.put("content", stringWriter.toString());
+        if (workSpace != null) {
+            String path = ConsoleContext.BASE_CLONE_DIR + params.get("r") + "/" + params.get("h") + "/" + params.get("f");
+            File workSpaceFile = new File(path);
+            StringWriter stringWriter = new StringWriter();
+            try (InputStream in = new FileInputStream(workSpaceFile)) {
+                IOUtils.copy(in, stringWriter, Charsets.UTF_8.name());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            map.put("content", stringWriter.toString());
+        } else {
+            Repository r = repositoryManager.getRepository(params.get("r"));
+            final String blobPath = params.get("f");
+            RevCommit commit = getCommit(r, params);
+            String source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, Charsets.UTF_8.name());
+            if (source == null) {
+                response.setStatus(HttpStatus.SC_NOT_FOUND);
+                response.getWriter().print("missing file");
+                return;
+            }
+            map.put("content", source);
+        }
         this.serialize(response, map);
+
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         Map<String, String> params = RepositoryTreePath.parse(pathInfo);
-        if (params.get("r") == null) {
+        String repo = params.get("r");
+        if (repo == null) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
             response.getWriter().print("invalid repository");
             return;
@@ -98,11 +107,26 @@ public class RepositoryFileServlet extends JsonServlet {
             response.getWriter().print("invalid branch");
             return;
         }
+        Git workSpace = ConsoleContext.WORK_SPACE.get(repo);
+        if (workSpace == null) {
+            File repoDir = new File(ConsoleContext.BASE_CLONE_DIR + repo + "/master");
+            try {
+                workSpace = Git.cloneRepository().setURI(ConsoleContext.BASE_GIT_URI + repo)
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
+                    .setDirectory(repoDir)
+                    .call();
+                ConsoleContext.WORK_SPACE.put(repo, workSpace);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+        String path = ConsoleContext.BASE_CLONE_DIR + repo + "/" + params.get("h") + "/" + params.get("f");
+        File workSpaceFile = new File(path);
         StringWriter stringWriter = new StringWriter();
         IOUtils.copy(request.getInputStream(), stringWriter, Charsets.UTF_8.name());
         UpdateFileRequest updateFileRequest = JsonUtils.fromJsonString(stringWriter.toString(), UpdateFileRequest.class);
-        String path = BASE_CLONE_DIR + params.get("r") + "/" + params.get("h") + "/" + params.get("f");
-        try (OutputStream out = new FileOutputStream(new File(path))) {
+        try (OutputStream out = new FileOutputStream(workSpaceFile)) {
             ByteStreams.copy(new ByteArrayInputStream(updateFileRequest.content.getBytes(Charsets.UTF_8.name())), out);
         } catch (Exception e) {
             throw new RuntimeException(e);
