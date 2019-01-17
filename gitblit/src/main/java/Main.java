@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.security.Security;
 import java.util.stream.Stream;
 
 /**
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
 public class Main {
     static {
         System.setProperty("log4j.rootLogger", "DEBUG");
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
 
     public static void main(String[] args) {
