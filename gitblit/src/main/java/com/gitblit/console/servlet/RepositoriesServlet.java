@@ -4,6 +4,7 @@ import com.gitblit.IStoredSettings;
 import com.gitblit.manager.IGitblit;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.servlet.JsonServlet;
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import org.apache.commons.io.FileUtils;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author miller
@@ -28,6 +30,7 @@ import java.util.List;
 public class RepositoriesServlet extends JsonServlet {
     public static final String BASE_GIT_URI = "ssh://admin@localhost:29418/";
     public static final String BASE_CLONE_DIR;
+    public static final Map<String, Git> LOCAL_REPOSITORIES = Maps.newConcurrentMap();
 
     static {
         File tempDir = Files.createTempDir();
@@ -69,10 +72,11 @@ public class RepositoriesServlet extends JsonServlet {
                     String master = r.HEAD.substring(r.HEAD.lastIndexOf("/") + 1);
                     File repoDir = new File(BASE_CLONE_DIR + r.name + "/" + master);
                     FileUtils.deleteDirectory(repoDir);
-                    Git.cloneRepository().setURI(BASE_GIT_URI + r.name)
+                    Git git = Git.cloneRepository().setURI(BASE_GIT_URI + r.name)
                         .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
                         .setDirectory(repoDir)
                         .call();
+                    LOCAL_REPOSITORIES.put(r.name, git);
                 }
                 loaded = true;
             } catch (Exception e) {
