@@ -19,7 +19,7 @@ export default class RepoList extends React.Component {
                 },
                 {
                     label: "Name",
-                    render: data => <Link to={`/repo/${data.name}`}>{data.name}</Link>
+                    render: data => <Link to={`/console/repo/${data.name}`}>{data.name}</Link>
                 },
                 {
                     label: "Date",

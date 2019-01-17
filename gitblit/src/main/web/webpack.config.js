@@ -71,7 +71,7 @@ module.exports = (env, {mode}) => {
         },
         {
             test: /\.(woff|woff2|eot|ttf)$/,
-            loader: "url-loader?limit=1000"
+            loader: "url-loader?limit=1000&outputPath=../css/"
         }
     ];
     if (mode === "production") {
@@ -113,13 +113,13 @@ module.exports = (env, {mode}) => {
         ],
         module: {rules},
         resolve: {extensions: [".js", ".jsx"]},
-         devServer: {
+        devServer: {
             port: 8000,
             contentBase: path.join(__dirname, '../dist'),
             index: 'index.html',
             proxy: {
-              '/api': 'http://localhost:8080'
+                '/api': 'http://localhost:8080'
             }
-          }
+        }
     };
 };

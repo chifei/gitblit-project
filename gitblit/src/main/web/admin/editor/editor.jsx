@@ -18,7 +18,7 @@ export default class Editor extends React.Component {
         const nameArray = name.split(".");
         const fileExt = nameArray.length > 1 ? nameArray[nameArray.length - 1] : "text";
         this.state = {
-            path: props.params.path,
+            path: props.match.params.path,
             repositoryName,
             branch,
             name,
@@ -76,5 +76,5 @@ export default class Editor extends React.Component {
 
 Editor.propTypes = {
     location: PropTypes.object,
-    params: PropTypes.object
+    match: PropTypes.object
 };

@@ -35,10 +35,11 @@ export default class Repository extends React.Component {
                     render: (data) => {
                         if (data.isFile) {
                             return <Link to={{
-                                pathName: `/editor/${data.path}`,
+                                pathname: `/console/editor/${data.path}`,
                                 state: {
                                     repositoryName: this.state.repositoryName,
-                                    branch: this.state.branch
+                                    branch: this.state.branch,
+                                    name: data.name
                                 }
                             }}>{data.name}</Link>;
                         }
