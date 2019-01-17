@@ -18,6 +18,8 @@ public class CustomWebModule extends ServletModule {
         serve("/api/repository/list").with(RepositoriesServlet.class);
         serve("/api/repository/tree/*").with(RepositoryTreeServlet.class);
         serve("/api/repository/file/*").with(RepositoryFileServlet.class);
+        //serve("/api/repository/status/*").with();
+        //serve("/api/repository/commit/*").with();
         serve("/static/*").with(ResourceServlet.class);
     }
 }
