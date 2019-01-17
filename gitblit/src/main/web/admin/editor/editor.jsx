@@ -54,7 +54,10 @@ export default class Editor extends React.Component {
         const folders = [];
         paths.forEach((p) => {
             if (p) {
-                newPath += path + "/";
+                if (newPath) {
+                    newPath += "/";
+                }
+                newPath += p;
                 folders.push(newPath);
             }
         });
@@ -69,12 +72,11 @@ export default class Editor extends React.Component {
     }
 
     submit() {
-        fetch("/", {
-            path: this.state.path,
-            repositoryName: this.state.repositoryName,
-            content: this.state.content
+        fetch(`/api/repository/file/${this.state.repositoryName}/${this.state.branch}${this.state.path}`, {
+            method: "POST",
+            body: JSON.stringify({content: this.state.content})
         }).then((data) => {
-            this.props.history.push(`/console/repo/${this.state.repositoryName}`);
+            this.props.history.push(`/console/repo/${this.state.repositoryName}${this.state.path.substr(0, this.state.path.lastIndexOf("/"))}`);
         });
     }
 
@@ -90,13 +92,11 @@ export default class Editor extends React.Component {
                             <Breadcrumb.Item>
                                 <Link to={`/console/repo/${this.state.repositoryName}`}>{this.state.repositoryName}</Link>
                             </Breadcrumb.Item>
-                            {this.state.folders.map(folder =>
-                                <Breadcrumb.Item key={folder}>
-                                    <Link to={`/console/repo/${this.state.repositoryName}/${folder}`}>{this.state.repositoryName}</Link>
+                            {this.state.folders.map(p =>
+                                <Breadcrumb.Item key={p}>
+                                    <Link to={`/console/repo/${this.state.repositoryName}/${p}`}>{p.split("/")[p.split("/").length - 1]}</Link>
                                 </Breadcrumb.Item>)
-
                             }
-
 
                         </Breadcrumb>
                     </Layout.Col>
@@ -104,6 +104,11 @@ export default class Editor extends React.Component {
                         <div className="head-operation">
                             <Button class="primary" size="small" onClick={() => this.submit()}>Save </Button>
                         </div>
+                    </Layout.Col>
+                </Layout.Row>
+                <Layout.Row>
+                    <Layout.Col span="24">
+                        <h1>Editor {this.state.path}</h1>
                     </Layout.Col>
                 </Layout.Row>
                 <Layout.Row>

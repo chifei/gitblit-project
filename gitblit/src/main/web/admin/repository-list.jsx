@@ -3,9 +3,9 @@ import {Breadcrumb, Layout, Table} from "element-react";
 import {Link} from "react-router-dom";
 import {library} from "@fortawesome/fontawesome-svg-core";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faFolder} from "@fortawesome/free-solid-svg-icons";
+import {faProjectDiagram} from "@fortawesome/free-solid-svg-icons";
 
-library.add(faFolder);
+library.add(faProjectDiagram);
 
 export default class RepoList extends React.Component {
     constructor(props) {
@@ -15,7 +15,7 @@ export default class RepoList extends React.Component {
                 {
                     label: "",
                     width: "80px",
-                    render: () => <FontAwesomeIcon icon="folder"/>
+                    render: () => <FontAwesomeIcon icon="project-diagram"/>
                 },
                 {
                     label: "Name",

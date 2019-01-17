@@ -5,7 +5,7 @@ import {Button, Dialog, Form, Input} from "element-react";
 export default class CreateFile extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {name: null};
+        this.state = {name: props.name};
     }
 
     createFile() {
@@ -50,7 +50,7 @@ export default class CreateFile extends React.Component {
 }
 
 CreateFile.propTypes = {
-    type: PropTypes.string,
+    name: PropTypes.string,
     onCancel: PropTypes.func,
     onCreate: PropTypes.func
 };

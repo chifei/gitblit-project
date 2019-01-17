@@ -4,21 +4,22 @@ import {Breadcrumb, Button, Layout, Table} from "element-react";
 import {Link} from "react-router-dom";
 import {library} from "@fortawesome/fontawesome-svg-core";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faFile, faPlus, faReply} from "@fortawesome/free-solid-svg-icons";
+import {faFile, faFolder, faPlus, faReply} from "@fortawesome/free-solid-svg-icons";
 
 import CreateFile from "./create-file";
 
 library.add(faPlus);
 library.add(faFile);
+library.add(faFolder);
 library.add(faReply);
 
 export default class Repository extends React.Component {
     constructor(props) {
         super(props);
-        const path = props.match.params.path;
+        const path = props.location.pathname.replace(`/console/repo/${props.match.params.repositoryName}`, "");
         this.state = {
             repositoryName: props.match.params.repositoryName,
-            path,
+            path: path.indexOf("/") === 0 ? path.replace("/", "") : path,
             branch: "master",
             creating: false,
             columns: [
@@ -161,7 +162,7 @@ export default class Repository extends React.Component {
                     </Layout.Col>
                 </Layout.Row>
                 {this.state.creating &&
-                <CreateFile onCreate={value => this.onCreate(value)} onCancel={() => this.onCancel()}/>
+                <CreateFile name={this.state.path + "/"} onCreate={value => this.onCreate(value)} onCancel={() => this.onCancel()}/>
                 }
             </div>
         );
@@ -171,5 +172,6 @@ export default class Repository extends React.Component {
 
 Repository.propTypes = {
     history: PropTypes.object,
+    location: PropTypes.object,
     match: PropTypes.object
 };
