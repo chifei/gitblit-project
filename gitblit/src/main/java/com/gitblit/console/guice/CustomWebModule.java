@@ -5,6 +5,7 @@ import com.gitblit.console.servlet.ConsoleServlet;
 import com.gitblit.console.servlet.RepositoriesServlet;
 import com.gitblit.console.servlet.RepositoryCommitServlet;
 import com.gitblit.console.servlet.RepositoryFileServlet;
+import com.gitblit.console.servlet.RepositoryFolderServlet;
 import com.gitblit.console.servlet.RepositoryRevertServlet;
 import com.gitblit.console.servlet.RepositoryStatusServlet;
 import com.gitblit.console.servlet.RepositoryTreeServlet;
@@ -32,6 +33,7 @@ public class CustomWebModule extends ServletModule {
         serve("/api/repository/list").with(RepositoriesServlet.class);
         serve("/api/repository/tree/*").with(RepositoryTreeServlet.class);
         serve("/api/repository/file/*").with(RepositoryFileServlet.class);
+        serve("/api/repository/folder/*").with(RepositoryFolderServlet.class);
         serve("/api/repository/status/*").with(RepositoryStatusServlet.class);
         serve("/api/repository/commit/*").with(RepositoryCommitServlet.class);
         serve("/api/repository/revert/*").with(RepositoryRevertServlet.class);

@@ -1,10 +1,7 @@
 package com.gitblit.console.service;
 
-import com.gitblit.console.ConsoleContext;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +24,8 @@ public class Workspace {
 
     public Git git() {
         try {
-            return Git.cloneRepository().setURI(ConsoleContext.BASE_GIT_URI + repo)
-                .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
-                .setDirectory(dir)
-                .call();
-        } catch (GitAPIException e) {
+            return Git.open(dir);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

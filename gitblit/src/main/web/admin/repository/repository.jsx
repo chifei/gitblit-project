@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {Breadcrumb, Button, Layout, Table} from "element-react";
+import {Breadcrumb, Button, Layout, Message as notify, Table} from "element-react";
 import {Link} from "react-router-dom";
 import {library} from "@fortawesome/fontawesome-svg-core";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -21,7 +21,8 @@ export default class Repository extends React.Component {
             repositoryName: props.match.params.repositoryName,
             path: path.indexOf("/") === 0 ? path.replace("/", "") : path,
             branch: "master",
-            creating: false,
+            createFileEnabled: false,
+            createFolderEnabled: false,
             changed: false,
             columns: [
                 {
@@ -92,7 +93,11 @@ export default class Repository extends React.Component {
     }
 
     createFile() {
-        this.setState({creating: true});
+        this.setState({createFileEnabled: true});
+    }
+
+    createFolder() {
+        this.setState({createFolderEnabled: true});
     }
 
     onCreate(name) {
@@ -104,6 +109,13 @@ export default class Repository extends React.Component {
                 branch: "master",
                 isNew: true
             }
+        });
+    }
+
+    onCreateFolder(name) {
+        fetch(`/api/repository/folder/${this.state.repositoryName}/${this.state.branch}/${name}`, {method: "POST"}).then(() => {
+            this.setState({createFolderEnabled: false});
+            this.reload();
         });
     }
 
@@ -126,24 +138,41 @@ export default class Repository extends React.Component {
         }, () => {
             this.props.history.push(`/console/repo/${this.state.repositoryName}/${path}`);
             this.reload();
+            notify({
+                message: "Folder Created",
+                type: "info"
+            });
         });
 
     }
 
     commit() {
         fetch(`/api/repository/commit/${this.state.repositoryName}/master`).then((response) => {
-            window.console.log("success");
+            this.setState({changed: false});
+            this.reload();
+            notify({
+                message: "Commit Success",
+                type: "success"
+            });
         });
     }
 
     revert() {
         fetch(`/api/repository/revert/${this.state.repositoryName}/master`).then((response) => {
-            window.console.log("success");
+            this.setState({changed: false});
+            this.reload();
+            notify({
+                message: "Revert Success",
+                type: "info"
+            });
         });
     }
 
     onCancel() {
-        this.setState({creating: false});
+        this.setState({
+            createFileEnabled: false,
+            createFolderEnabled: false
+        });
     }
 
     render() {
@@ -172,7 +201,8 @@ export default class Repository extends React.Component {
                     </Layout.Col>
                     <Layout.Col span="8">
                         <div className="head-operation">
-                            <Button size="small" onClick={() => this.createFile()}>New File </Button>
+                            <Button size="small" onClick={() => this.createFile()}>New File</Button>
+                            <Button size="small" onClick={() => this.createFolder()}>New Folder</Button>
                         </div>
                     </Layout.Col>
                 </Layout.Row>
@@ -186,8 +216,11 @@ export default class Repository extends React.Component {
                         />
                     </Layout.Col>
                 </Layout.Row>
-                {this.state.creating &&
+                {this.state.createFileEnabled &&
                 <CreateFile name={this.state.path ? this.state.path + "/" : null} onCreate={value => this.onCreate(value)} onCancel={() => this.onCancel()}/>
+                }
+                {this.state.createFolderEnabled &&
+                <CreateFile name={this.state.path ? this.state.path + "/" : null} onCreate={value => this.onCreateFolder(value)} onCancel={() => this.onCancel()}/>
                 }
             </div>
         );

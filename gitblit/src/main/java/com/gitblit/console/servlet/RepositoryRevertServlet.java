@@ -23,7 +23,7 @@ public class RepositoryRevertServlet extends JsonServlet {
     @Override
     protected void processRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         String pathInfo = httpServletRequest.getPathInfo();
-        String repository = pathInfo.substring(1);
+        String repository = pathInfo.substring(1).split("/")[0];
         Optional<Workspace> workspace = workspaceService.workspace(repository);
         if (!workspace.isPresent()) {
             return;

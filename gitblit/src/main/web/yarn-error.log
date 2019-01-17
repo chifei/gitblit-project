@@ -2,7 +2,7 @@ Arguments:
   C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\yarn\bin\yarn.js install
 
 PATH: 
-  C:\cygwin64\usr\local\bin;C:\cygwin64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files\nodejs;C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\WINDOWS\System32\OpenSSH;C:\Program Files (x86)\OpenVPN\bin;C:\Program Files (x86)\Skype\Phone;C:\Users\chi\AppData\Local\Microsoft\WindowsApps;C:\Program Files\MongoDB\Server\3.2\bin;C:\Users\chi\AppData\Roaming\npm;C:\Users\chi\AppData\Local\Programs\Python\Python36;C:\Program Files\Microsoft VS Code\bin;C:\Users\chi\OneDrive\bin;C:\Users\chi\AppData\Local\Programs\Fiddler;D:\Program Files (x86)\ImageMagick-6.8.8\bin;C:\Program Files\wkhtmltopdf\bin;D:\Program Files\Java\jdk1.8.0_191\bin
+  C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\OpenVPN\bin;C:\Program Files (x86)\Skype\Phone\;C:\Users\chi\AppData\Local\Microsoft\WindowsApps;C:\Program Files\MongoDB\Server\3.2\bin;C:\Users\chi\AppData\Roaming\npm;C:\Users\chi\AppData\Local\Programs\Python\Python36;C:\Program Files\Microsoft VS Code\bin;C:\Users\chi\OneDrive\bin;C:\Users\chi\AppData\Local\Programs\Fiddler;D:\Program Files (x86)\ImageMagick-6.8.8\bin;C:\Program Files\wkhtmltopdf\bin;D:\Program Files\Java\jdk1.8.0_191\bin;
 
 Yarn version: 
   1.3.2
@@ -8370,4 +8370,4 @@ Lockfile:
       yargs-parser "^11.1.1"
 
 Trace: 
-  Error: ENOENT: no such file or directory, open 'C:\Users\chi\AppData\Local\Yarn\cache\v1\npm-caniuse-db-1.0.30000928-2e83d2b14276442da239511615eb7c62fed0cfa7\.yarn-metadata.json'
+  Error: ENOENT: no such file or directory, copyfile 'C:\Users\chi\AppData\Local\Yarn\cache\v1\npm-inherits-2.0.1-b17d08d326b4423e568eff719f91b0b1cbdf69f1\inherits_browser.js' -> 'D:\Workspace\upwork\gitblit-project\gitblit\src\main\web\node_modules\assert\node_modules\inherits\inherits_browser.js'

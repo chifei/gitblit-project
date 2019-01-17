@@ -14,6 +14,7 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -125,12 +126,14 @@ public class RepositoryFileServlet extends JsonServlet {
         StringWriter stringWriter = new StringWriter();
         IOUtils.copy(request.getInputStream(), stringWriter, Charsets.UTF_8.name());
         UpdateFileRequest updateFileRequest = JsonUtils.fromJsonString(stringWriter.toString(), UpdateFileRequest.class);
-        try (OutputStream out = new FileOutputStream(workSpaceFile)) {
+        try (OutputStream out = new FileOutputStream(workSpaceFile); Git git = workspace.git()) {
             ByteStreams.copy(new ByteArrayInputStream(updateFileRequest.content.getBytes(Charsets.UTF_8.name())), out);
             out.flush();
+            git.add().addFilepattern(".").call();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     protected RevCommit getCommit(Repository r, Map<String, String> params) {

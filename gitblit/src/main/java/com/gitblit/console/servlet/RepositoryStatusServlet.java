@@ -5,6 +5,7 @@ import com.gitblit.console.service.WorkspaceService;
 import com.gitblit.servlet.JsonServlet;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 
 import javax.inject.Inject;
@@ -28,15 +29,16 @@ public class RepositoryStatusServlet extends JsonServlet {
     @Override
     protected void processRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         String pathInfo = httpServletRequest.getPathInfo();
-        String repository = pathInfo.substring(1);
+        String[] parts = pathInfo.substring(1).split("/");
+        String repository = parts[0];
 
         Optional<Workspace> workspace = workspaceService.workspace(repository);
         Map<String, Boolean> response = Maps.newHashMap();
         if (!workspace.isPresent()) {
             response.put("changed", false);
         } else {
-            try {
-                Status status = workspace.get().git().status().call();
+            try (Git git = workspace.get().git()) {
+                Status status = git.status().call();
                 Set<String> changed = status.getUncommittedChanges();
                 response.put("changed", !changed.isEmpty());
             } catch (Exception e) {
