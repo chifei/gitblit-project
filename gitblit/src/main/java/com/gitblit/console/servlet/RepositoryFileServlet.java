@@ -125,6 +125,9 @@ public class RepositoryFileServlet extends JsonServlet {
         }
         String path = ConsoleContext.WORK_SPACE_DIR + repo + File.separator + params.get("f");
         File workSpaceFile = new File(path);
+        if (!workSpaceFile.exists()) {
+            com.google.common.io.Files.createParentDirs(workSpaceFile);
+        }
         StringWriter stringWriter = new StringWriter();
         IOUtils.copy(request.getInputStream(), stringWriter, Charsets.UTF_8.name());
         UpdateFileRequest updateFileRequest = JsonUtils.fromJsonString(stringWriter.toString(), UpdateFileRequest.class);

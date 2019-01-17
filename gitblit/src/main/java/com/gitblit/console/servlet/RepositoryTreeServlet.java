@@ -63,7 +63,7 @@ public class RepositoryTreeServlet extends JsonServlet {
                 .stream().map(this::model).collect(Collectors.toList());
             this.serialize(httpServletResponse, paths);
         } else {
-            String workSpacePath = ConsoleContext.WORK_SPACE_DIR + repo + path + File.separator;
+            String workSpacePath = ConsoleContext.WORK_SPACE_DIR + repo + File.separator + path + File.separator;
             File file = new File(workSpacePath);
             if (!file.exists()) {
                 httpServletResponse.setStatus(HttpStatus.SC_NOT_FOUND);
@@ -73,7 +73,16 @@ public class RepositoryTreeServlet extends JsonServlet {
             List<TreePathModel> paths = Lists.newArrayList();
             if (files != null) {
                 for (File f : files) {
-                    paths.add(model(f, repo + path));
+                    if (".git".equals(f.getName())) {
+                        continue;
+                    }
+                    String p;
+                    if ("".equals(path)) {
+                        p = f.getName();
+                    } else {
+                        p = path + File.separator + f.getName();
+                    }
+                    paths.add(model(f, p));
                 }
             }
             this.serialize(httpServletResponse, paths);
