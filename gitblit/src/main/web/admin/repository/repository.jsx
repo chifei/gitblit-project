@@ -162,7 +162,7 @@ export default class Repository extends React.Component {
                     </Layout.Col>
                 </Layout.Row>
                 {this.state.creating &&
-                <CreateFile name={this.state.path + "/"} onCreate={value => this.onCreate(value)} onCancel={() => this.onCancel()}/>
+                <CreateFile name={this.state.path ? this.state.path + "/" : null} onCreate={value => this.onCreate(value)} onCancel={() => this.onCancel()}/>
                 }
             </div>
         );
