@@ -57,43 +57,21 @@ class App extends React.Component {
         });
     }
 
-    isActive(route) {
-        const pathname = this.state.pathname || history.location.pathname;
-        return route && pathname.startsWith(route);
-    }
-
-    isItemActive(route) {
-        const pathname = this.state.pathname || history.location.pathname;
-        return route && pathname === route;
-    }
-
-    toggleMenu() {
-        this.setState({shownMenu: !this.state.shownMenu}, () => this.fixPage());
-    }
-
-    fixMenu() {
-        this.setState({fixedMenu: !this.state.fixedMenu}, () => this.fixPage());
-    }
-
-    fixPage(fixed) {
-        this.setState({pageFixed: this.state.shownMenu && this.state.fixedMenu});
-    }
-
     render() {
         return (
-            <div>
-                <Menu theme="dark" defaultActive="1" className="el-menu-demo" mode="horizontal" onSelect={index => this.onSelect(index)}>
-                    <Menu.Item index="/repo">Repo</Menu.Item>
-                </Menu>
+            <div className="app">
+                <div className="header">
+                    <Menu theme="dark" defaultActive="1" className="el-menu-demo" mode="horizontal" onSelect={index => this.onSelect(index)}>
+                        <Menu.Item index="/console">Console</Menu.Item>
+                    </Menu>
+                </div>
                 <Page/>
             </div>
         );
     }
 
     onSelect(index) {
-        if (index.startsWith("/")) {
-            history.push(index);
-        }
+        history.push(index);
     }
 }
 

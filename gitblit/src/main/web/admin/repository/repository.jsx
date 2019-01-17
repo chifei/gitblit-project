@@ -22,6 +22,7 @@ export default class Repository extends React.Component {
             path: path.indexOf("/") === 0 ? path.replace("/", "") : path,
             branch: "master",
             creating: false,
+            changed: false,
             columns: [
                 {
                     label: "",
@@ -65,6 +66,10 @@ export default class Repository extends React.Component {
             this.changeFolder(this.state.path);
         }
         this.reload();
+
+        fetch(`/api/repository/status/${this.state.repositoryName}/master`).then((response) => {
+            this.setState({changed: response.changed});
+        });
     }
 
     reload() {
@@ -125,6 +130,18 @@ export default class Repository extends React.Component {
 
     }
 
+    commit() {
+        fetch(`/api/repository/commit/${this.state.repositoryName}/master`).then((response) => {
+            window.console.log("success");
+        });
+    }
+
+    revert() {
+        fetch(`/api/repository/revert/${this.state.repositoryName}/master`).then((response) => {
+            window.console.log("success");
+        });
+    }
+
     onCancel() {
         this.setState({creating: false});
     }
@@ -132,6 +149,14 @@ export default class Repository extends React.Component {
     render() {
         return (
             <div>
+                {
+                    this.state.changed &&
+                    <div className="repository__buttons">
+                        <Button onClick={() => this.commit()}>Commit</Button>
+                        <Button onClick={() => this.revert()}>Revert</Button>
+                    </div>
+                }
+
                 <Layout.Row>
                     <Layout.Col span="16">
                         <Breadcrumb separator="/">

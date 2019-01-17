@@ -1,14 +1,11 @@
 package com.gitblit.console.servlet;
 
 import com.gitblit.IStoredSettings;
-import com.gitblit.console.ConsoleContext;
 import com.gitblit.manager.IGitblit;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.servlet.JsonServlet;
 import com.google.inject.Singleton;
 import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -22,13 +19,6 @@ import java.util.List;
  */
 @Singleton
 public class RepositoriesServlet extends JsonServlet {
-
-
-    private final Logger logger = LoggerFactory.getLogger(RepositoriesServlet.class);
-    //private static final String BASE_GIT_URI = "https://admin@localhost:8443/r/";
-//    private volatile boolean loaded = false;
-//    private volatile boolean free = true;
-
     private IStoredSettings settings;
     private IGitblit gitblit;
 
@@ -36,7 +26,6 @@ public class RepositoriesServlet extends JsonServlet {
     public RepositoriesServlet(IStoredSettings settings, IGitblit gitblit) {
         this.settings = settings;
         this.gitblit = gitblit;
-        logger.info("base clone dir={}", ConsoleContext.WORK_SPACE_DIR);
     }
 
     @Override

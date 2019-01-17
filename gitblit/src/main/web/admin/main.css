@@ -2,6 +2,10 @@ body {
     margin: 0;
 }
 
+.el-menu {
+    border-radius: 0 !important;
+}
+
 a,
 a:visited,
 a:hover,
@@ -28,4 +32,14 @@ a:active {
 
 .head-operation .el-dropdown-menu__item {
     white-space: nowrap;
+}
+
+.repository__buttons {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.repository__buttons .el-button {
+    border: none !important;
 }

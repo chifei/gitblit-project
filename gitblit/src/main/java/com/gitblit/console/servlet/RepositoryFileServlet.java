@@ -1,6 +1,7 @@
 package com.gitblit.console.servlet;
 
-import com.gitblit.console.ConsoleContext;
+import com.gitblit.console.service.Workspace;
+import com.gitblit.console.service.WorkspaceService;
 import com.gitblit.console.servlet.model.RepositoryTreePath;
 import com.gitblit.console.servlet.model.UpdateFileRequest;
 import com.gitblit.manager.IRepositoryManager;
@@ -13,11 +14,8 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.apache.wicket.util.file.Files;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -32,6 +30,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -40,10 +39,12 @@ import java.util.Map;
 @Singleton
 public class RepositoryFileServlet extends JsonServlet {
     private IRepositoryManager repositoryManager;
+    private WorkspaceService workspaceService;
 
     @Inject
-    public RepositoryFileServlet(IRepositoryManager repositoryManager) {
+    public RepositoryFileServlet(IRepositoryManager repositoryManager, WorkspaceService workspaceService) {
         this.repositoryManager = repositoryManager;
+        this.workspaceService = workspaceService;
     }
 
     @Override
@@ -55,7 +56,8 @@ public class RepositoryFileServlet extends JsonServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         Map<String, String> params = RepositoryTreePath.parse(pathInfo);
-        if (params.get("r") == null) {
+        String repository = params.get("r");
+        if (repository == null) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
             response.getWriter().print("invalid repository");
             return;
@@ -65,11 +67,12 @@ public class RepositoryFileServlet extends JsonServlet {
             response.getWriter().print("invalid branch");
             return;
         }
-        Git workSpace = ConsoleContext.WORK_SPACE.get(params.get("r"));
+
+        Optional<Workspace> workspace = workspaceService.workspace(repository);
         Map<String, String> map = Maps.newHashMap();
-        if (workSpace != null) {
-            String path = ConsoleContext.WORK_SPACE_DIR + params.get("r") + File.separator + params.get("f");
-            File workSpaceFile = new File(path);
+        if (workspace.isPresent()) {
+            String path = params.get("f");
+            File workSpaceFile = workspace.get().file(path);
             StringWriter stringWriter = new StringWriter();
             try (InputStream in = new FileInputStream(workSpaceFile)) {
                 IOUtils.copy(in, stringWriter, Charsets.UTF_8.name());
@@ -78,7 +81,7 @@ public class RepositoryFileServlet extends JsonServlet {
             }
             map.put("content", stringWriter.toString());
         } else {
-            Repository r = repositoryManager.getRepository(params.get("r"));
+            Repository r = repositoryManager.getRepository(repository);
             final String blobPath = params.get("f");
             RevCommit commit = getCommit(r, params);
             String source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, Charsets.UTF_8.name());
@@ -108,23 +111,14 @@ public class RepositoryFileServlet extends JsonServlet {
             response.getWriter().print("invalid branch");
             return;
         }
-        Git workSpace = ConsoleContext.WORK_SPACE.get(repo);
-        if (workSpace == null) {
-            File repoDir = new File(ConsoleContext.WORK_SPACE_DIR + repo);
-            try {
-                Files.remove(repoDir);
-                workSpace = Git.cloneRepository().setURI(ConsoleContext.BASE_GIT_URI + repo)
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider("admin", "admin"))
-                    .setDirectory(repoDir)
-                    .call();
-                ConsoleContext.WORK_SPACE.put(repo, workSpace);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
+        Optional<Workspace> workspaceOptional = workspaceService.workspace(repo);
+        Workspace workspace;
+        if (!workspaceOptional.isPresent()) {
+            workspace = workspaceService.createWorkspace(repo);
+        } else {
+            workspace = workspaceOptional.get();
         }
-        String path = ConsoleContext.WORK_SPACE_DIR + repo + File.separator + params.get("f");
-        File workSpaceFile = new File(path);
+        File workSpaceFile = workspace.file(params.get("f"));
         if (!workSpaceFile.exists()) {
             com.google.common.io.Files.createParentDirs(workSpaceFile);
         }

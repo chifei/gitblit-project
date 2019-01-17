@@ -38,7 +38,7 @@ public class ConsoleServer extends GitBlitServer {
 
     public static void main(String... args) {
         GitBlitServer server = new ConsoleServer();
-        List<String> filtered = new ArrayList();
+        List<String> filtered = new ArrayList<>();
         String folder = "data";
 
         for (int i = 0; i < args.length; ++i) {
@@ -63,9 +63,7 @@ public class ConsoleServer extends GitBlitServer {
 
         try {
             parser.parseArgument(filtered);
-            if (params.help) {
-                server.usage(parser, (CmdLineException) null);
-            }
+            if (params.help) server.usage(parser, null);
         } catch (CmdLineException var7) {
             server.usage(parser, var7);
         }

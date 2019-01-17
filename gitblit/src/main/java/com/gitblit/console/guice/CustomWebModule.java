@@ -1,5 +1,6 @@
 package com.gitblit.console.guice;
 
+import com.gitblit.console.service.WorkspaceService;
 import com.gitblit.console.servlet.ConsoleServlet;
 import com.gitblit.console.servlet.RepositoriesServlet;
 import com.gitblit.console.servlet.RepositoryCommitServlet;
@@ -10,12 +11,22 @@ import com.gitblit.console.servlet.RepositoryTreeServlet;
 import com.gitblit.console.servlet.ResourceServlet;
 import com.google.inject.servlet.ServletModule;
 
+import java.io.File;
+
 /**
  * @author miller
  */
 public class CustomWebModule extends ServletModule {
+    private final File basePath;
+
+    public CustomWebModule(File basePath) {
+        this.basePath = basePath;
+    }
+
     @Override
     protected void configureServlets() {
+        bind(WorkspaceService.class).toInstance(new WorkspaceService(new File(basePath, "workspace")));
+
         serve("/console").with(ConsoleServlet.class);
         serve("/console/*").with(ConsoleServlet.class);
         serve("/api/repository/list").with(RepositoriesServlet.class);

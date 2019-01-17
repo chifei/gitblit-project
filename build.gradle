@@ -13,7 +13,6 @@ def wikitext_version = '1.4'
 def sshd_version = '1.0.0'
 def mina_version = '2.0.9'
 def guice_version = '4.0'
-def guice_servlet_version = '4.0'
 
 subprojects {
     apply plugin: 'maven-publish'
@@ -50,7 +49,6 @@ project(':gitblit') {
         compile group: 'javax.activation', name: 'activation', version: '1.1'
 
         compile "com.google.inject:guice:${guice_version}"
-        compile "com.google.inject.extensions:guice-servlet:${guice_servlet_version}"
         compile "com.google.guava:guava:18.0"
         compile "com.intellij:annotations:12.0"
         compile "log4j:log4j:1.2.17"

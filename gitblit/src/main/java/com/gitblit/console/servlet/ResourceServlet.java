@@ -9,6 +9,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +37,10 @@ public class ResourceServlet extends HttpServlet {
     }
 
     private InputStream resource(String path) throws FileNotFoundException {
-//        String dir = "/Users/guoshijie/develop/gitblit-project/gitblit/src/main/resources/static";
-//        return new FileInputStream(new File(dir, path));
-//
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        return loader.getResourceAsStream(BASE_PATH + path);
+        String dir = "D:\\Workspace\\upwork\\gitblit-project\\gitblit\\src\\main\\resources\\static";
+        return new FileInputStream(new File(dir, path));
+////
+//        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//        return loader.getResourceAsStream(BASE_PATH + path);
     }
 }

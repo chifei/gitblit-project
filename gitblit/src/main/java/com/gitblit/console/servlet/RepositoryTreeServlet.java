@@ -1,6 +1,7 @@
 package com.gitblit.console.servlet;
 
-import com.gitblit.console.ConsoleContext;
+import com.gitblit.console.service.Workspace;
+import com.gitblit.console.service.WorkspaceService;
 import com.gitblit.console.servlet.model.RepositoryTreePath;
 import com.gitblit.console.servlet.model.TreePathModel;
 import com.gitblit.manager.IRepositoryManager;
@@ -10,7 +11,6 @@ import com.gitblit.utils.JGitUtils;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import org.apache.http.HttpStatus;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -30,10 +31,12 @@ import java.util.stream.Collectors;
 @Singleton
 public class RepositoryTreeServlet extends JsonServlet {
     private IRepositoryManager repositoryManager;
+    private WorkspaceService workspaceService;
 
     @Inject
-    public RepositoryTreeServlet(IRepositoryManager repositoryManager) {
+    public RepositoryTreeServlet(IRepositoryManager repositoryManager, WorkspaceService workspaceService) {
         this.repositoryManager = repositoryManager;
+        this.workspaceService = workspaceService;
     }
 
     @Override
@@ -55,16 +58,17 @@ public class RepositoryTreeServlet extends JsonServlet {
         if (path == null) {
             path = "";
         }
-        Git git = ConsoleContext.WORK_SPACE.get(repo);
-        if (git == null) {
+
+        Optional<Workspace> workspace = workspaceService.workspace(repo);
+
+        if (!workspace.isPresent()) {
             Repository r = repositoryManager.getRepository(repo);
             RevCommit commit = getCommit(r, params);
             List<TreePathModel> paths = JGitUtils.getFilesInPath2(r, path, commit)
                 .stream().map(this::model).collect(Collectors.toList());
             this.serialize(httpServletResponse, paths);
         } else {
-            String workSpacePath = ConsoleContext.WORK_SPACE_DIR + repo + File.separator + path + File.separator;
-            File file = new File(workSpacePath);
+            File file = workspace.get().file(path + File.separator);
             if (!file.exists()) {
                 httpServletResponse.setStatus(HttpStatus.SC_NOT_FOUND);
                 return;
