@@ -11,19 +11,25 @@ import "brace/mode/html";
 import "brace/mode/css";
 import "brace/theme/github";
 
+const availableModes = ["java", "javascript", "html", "css"];
+
 export default class Editor extends React.Component {
     constructor(props) {
         super(props);
         const {repositoryName, branch, name} = props.location.state;
         const nameArray = name.split(".");
-        const fileExt = nameArray.length > 1 ? nameArray[nameArray.length - 1] : "text";
+        const fileExt = nameArray[nameArray.length - 1];
+        let mode = "text";
+        if (fileExt && availableModes.indexOf(fileExt.toLocaleLowerCase()) >= 0) {
+            mode = fileExt;
+        }
         this.state = {
             path: props.match.params.path,
             repositoryName,
             branch,
             name,
             content: "",
-            mode: fileExt
+            mode
         };
     }
 
